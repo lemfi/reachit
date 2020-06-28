@@ -1,0 +1,4 @@
+.*
+!.gitignore
+developer.gradle.kts
+build
