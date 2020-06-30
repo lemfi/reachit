@@ -1,5 +1,4 @@
 import org.springframework.boot.gradle.tasks.run.BootRun
-import java.lang.IllegalArgumentException
 
 apply(plugin = "org.springframework.boot")
 

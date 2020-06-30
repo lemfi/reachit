@@ -9,7 +9,7 @@ open class Configuration {
 
     @Bean
     open fun httpClient(): OkHttpClient {
-        return OkHttpClient.Builder().build()
+        return OkHttpClient.Builder().followRedirects(false).build()
     }
 
 }

@@ -1,9 +1,7 @@
 package fr.lemfi.reachit.server.controller
 
 import fr.lemfi.reachit.server.business.Payload
-import fr.lemfi.reachit.server.service.MessageService
 import fr.lemfi.reachit.server.service.MiddlewareService
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,7 +17,7 @@ internal class RequestController(val middlewareService: MiddlewareService) {
             "/{developer}/**",
             method = [RequestMethod.GET]
     )
-    fun get(@PathVariable developer: String, request: HttpServletRequest): ResponseEntity<Any> {
+    fun get(@PathVariable developer: String, request: HttpServletRequest): ResponseEntity<Any?> {
 
         println("Receiving message for $developer, ... forwarding ...")
 
@@ -28,7 +26,16 @@ internal class RequestController(val middlewareService: MiddlewareService) {
                     entry.value.map { "${entry.key}=$it" }
                 }.joinToString("&")
 
-        return ResponseEntity.ok(middlewareService.notify(developer, Payload("GET", path)))
+        return middlewareService.notify(developer, Payload("GET", path)).let { response ->
+            ResponseEntity.status(response.status)
+                    .headers {
+                        headers ->
+                        response.headers.forEach {
+                            headers.set(it.key, it.value as String?)
+                        }
+                    }
+                    .body(response.body)
+        }
     }
 }
 
