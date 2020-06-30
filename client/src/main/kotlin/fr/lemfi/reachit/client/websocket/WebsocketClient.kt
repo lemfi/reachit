@@ -44,7 +44,7 @@ class WebsocketClient(
             try {
                 StandardWebSocketClient(
                         ContainerProvider.getWebSocketContainer().apply {
-                            connectToServer(this@WebsocketClient, URI(properties.socket + "flemontreer"))
+                            connectToServer(this@WebsocketClient, URI(properties.socket + properties.developer))
                         }
                 )
                 break
@@ -53,6 +53,7 @@ class WebsocketClient(
 
     @OnMessage
     fun onMessage(message: String?) {
+        println("receiving message $message")
         message?.let {
             messageService.onMessage(objectMapper.readValue(it, Payload::class.java))
         }
