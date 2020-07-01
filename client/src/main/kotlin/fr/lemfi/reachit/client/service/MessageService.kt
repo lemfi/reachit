@@ -36,9 +36,7 @@ class MessageService(
                     httpClient.newCall(
                             Request.Builder()
                                     .url(serverProperties.api + "/" + payload.key)
-                                    .method("POST", response.body?.byteStream()?.toRequestBody(
-                                            response.header("content-type", "application/json")!!.toMediaType().let{ "${it.type}/${it.subtype}" }.toMediaType(),
-                                            response.header("content-length", "0")!!.toLong()))
+                                    .method("POST", response.body?.string()?.toRequestBody("application/json".toMediaType()))
                                     .apply {
                                         response.headers.forEach {
                                             addHeader(it.first, it.second)
