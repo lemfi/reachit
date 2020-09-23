@@ -5,6 +5,7 @@ import fr.lemfi.reachit.server.business.Payload
 import fr.lemfi.reachit.server.service.MiddlewareService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.net.URLEncoder
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -21,7 +22,7 @@ internal class RequestController(val middlewareService: MiddlewareService) {
 
         val path = request.servletPath.substringAfter("/req/$developer") + "?" +
                 request.parameterMap.flatMap { entry ->
-                    entry.value.map { "${entry.key}=$it" }
+                    entry.value.map { "${entry.key}=${ URLEncoder.encode(it, Charsets.UTF_8)}" }
                 }.joinToString("&")
 
         return middlewareService.notify(developer, Payload(method = request.method, path = path, body = body?.let {jacksonObjectMapper().writeValueAsString(it)})).let { response ->
