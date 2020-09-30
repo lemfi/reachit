@@ -13,10 +13,9 @@ internal class ResponseController(val middlewareService: MiddlewareService) {
 
     @RequestMapping(
             "/{id}",
-            method = [RequestMethod.POST],
-            consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE],
-            produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun get(@PathVariable id: String, @RequestBody body: Any?, request: HttpServletRequest): ResponseEntity<Any> {
+            method = [RequestMethod.POST]
+    )
+    fun get(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Any> {
 
         middlewareService.response(id,
 
@@ -29,7 +28,7 @@ internal class ResponseController(val middlewareService: MiddlewareService) {
                         }.map {
                             it to request.getHeader(it)
                         }.toMap(),
-                        body = body
+                        body = request.inputStream.readAllBytes()
                 ))
 
         return ResponseEntity.noContent().build()

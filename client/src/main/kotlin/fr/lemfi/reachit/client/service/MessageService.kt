@@ -10,6 +10,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.closeQuietly
+import okhttp3.internal.headersContentLength
 import okio.BufferedSink
 import okio.Source
 import okio.source
@@ -36,7 +37,7 @@ class MessageService(
                     httpClient.newCall(
                             Request.Builder()
                                     .url(serverProperties.api + "/" + payload.key)
-                                    .method("POST", response.body?.string()?.toRequestBody("application/json".toMediaType()))
+                                    .method("POST", response.body?.byteStream()?.toRequestBody(response.header("Content-Type", "application/octet-stream;Charset=binary")!!.toMediaType(), response.headersContentLength()))
                                     .apply {
                                         response.headers.forEach {
                                             addHeader(it.first, it.second)
