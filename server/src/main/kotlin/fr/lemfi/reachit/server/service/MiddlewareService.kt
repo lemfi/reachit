@@ -13,6 +13,7 @@ class MiddlewareService(val messageService: MessageService) {
     val channels: MutableMap<String, Channel<Response>> = mutableMapOf()
 
     fun notify(developer: String, payload: Payload): Response {
+
         return runBlocking {
             Channel<Response>().also {
                 messageService.notify(developer, payload).apply {
