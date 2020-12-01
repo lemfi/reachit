@@ -1,11 +1,8 @@
-#spring:
-#  main.web-application-type: NONE
-
 server.port: 8050
 
 forward:
-  host: http://localhost:8080/test
+  host: http://localhost:8001
 
 server:
   socket: ws://localhost:8080/socket?name=
-  api: http://localhost:8080/resp
+  api: http://localhost:8080
