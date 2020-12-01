@@ -1,7 +1,5 @@
 package fr.lemfi.reachit.client.websocket
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import fr.lemfi.reachit.client.business.Payload
 import fr.lemfi.reachit.client.configuration.ServerProperties
 import fr.lemfi.reachit.client.service.MessageService
 import org.springframework.stereotype.Component
@@ -14,7 +12,6 @@ import javax.websocket.*
 @ClientEndpoint
 class WebsocketClient(
         val messageService: MessageService,
-        val objectMapper: ObjectMapper,
         val properties: ServerProperties
 ) {
 
@@ -55,7 +52,7 @@ class WebsocketClient(
     fun onMessage(message: String?) {
         println("receiving message $message")
         message?.let {
-            messageService.onMessage(objectMapper.readValue(it, Payload::class.java))
+            messageService.onMessage(message)
         }
     }
 

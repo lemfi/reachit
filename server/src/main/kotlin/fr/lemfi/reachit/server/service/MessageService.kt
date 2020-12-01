@@ -6,11 +6,18 @@ import fr.lemfi.reachit.server.business.Room
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
+import java.util.*
 
 @Component
 class MessageService(val objectMapper: ObjectMapper) {
 
     val rooms: MutableSet<Room> = mutableSetOf()
+
+    val payloads = mutableMapOf<String, Payload>()
+
+    fun getPayload(uuid: String): Payload {
+        return payloads.remove(uuid)!!
+    }
 
     fun acceptSession(session: WebSocketSession) {
         getRoomName(session)
@@ -23,9 +30,16 @@ class MessageService(val objectMapper: ObjectMapper) {
     }
 
     fun notify(developer: String, payload: Payload) {
-        getRoom(developer)?.developer?.sendMessage(
-                TextMessage(objectMapper.writeValueAsBytes(payload))
-        ) ?: throw IllegalArgumentException("developer $developer is not listening")
+
+        with(UUID.randomUUID().toString()) {
+
+            payloads.put(this, payload)
+
+            getRoom(developer)?.developer?.sendMessage(
+                    TextMessage(this)
+            ) ?: throw IllegalArgumentException("developer $developer is not listening")
+        }
+
     }
 
     private fun getRoom(developer: String) = rooms.filter { developer == it.name }.firstOrNull()
