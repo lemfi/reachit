@@ -1,2 +1,2 @@
 rootProject.name = "reach it"
-include("client", "server")
+include("client", "server", "test")
