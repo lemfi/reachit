@@ -1,9 +1,14 @@
 package fr.lemfi.reachit.server.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import fr.lemfi.reachit.server.business.MultipartPayload
+import fr.lemfi.reachit.server.business.NoMultipartPayload
+import fr.lemfi.reachit.server.business.Part
 import fr.lemfi.reachit.server.business.Payload
 import fr.lemfi.reachit.server.service.MiddlewareService
 import okhttp3.internal.closeQuietly
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -23,16 +28,67 @@ internal class RequestController(val middlewareService: MiddlewareService) {
 
         println("Receiving message for $developer, ... forwarding ...")
 
-        val path = request.servletPath.substringAfter("/req/$developer") + "?" +
-                request.parameterMap.flatMap { entry ->
-                    entry.value.map { "${entry.key}=${URLEncoder.encode(it, Charsets.UTF_8)}" }
-                }.joinToString("&")
+        notify(responses, developer,
+                NoMultipartPayload(
+                        method = request.method,
+                        headers = request.headerNames.toList().map { it to request.getHeader(it) }.let {
+                            mutableMapOf<String, String>().apply {
+                                it.forEach { put(it.first, it.second) }
+                            }
+                        },
+                        contentType = request.contentType,
+                        path = path(request, developer),
+                        body = body?.let { jacksonObjectMapper().writeValueAsBytes(it) }
+                ))
+    }
 
-        middlewareService.notify(developer, Payload(method = request.method, headers = request.headerNames.toList().map { it to request.getHeader(it) }.let {
-            mutableMapOf<String, String>().apply {
-                it.forEach { put(it.first, it.second) }
+    @RequestMapping(
+            "/{developer}/**",
+            method = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE],
+            consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun multipart(@PathVariable developer: String, request: HttpServletRequest, responses: HttpServletResponse) {
+
+        println("Receiving message for $developer, ... forwarding ...")
+
+        val formFields = ServletFileUpload().getItemIterator(request).let { items ->
+            mutableMapOf<String, Boolean>().also { parts ->
+                while (items.hasNext()) {
+                    items.next().let {
+                        parts.put(it.name, it.isFormField)
+                    }
+                }
             }
-        }, path = path, body = body?.let { jacksonObjectMapper().writeValueAsString(it) }))
+        }
+
+        val parts = request.parts.map {
+            Part(
+                    data = it.inputStream.readAllBytes(),
+                    contentType = it?.contentType ?: "text/plain",
+                    name = it.name,
+                    file = formFields[it.name] ?: true,
+                    filename = it.submittedFileName
+            )
+        }
+
+        notify(responses, developer,
+                MultipartPayload(
+                        method = request.method,
+                        path = path(request, developer),
+                        headers = request.headerNames.toList().map { it to request.getHeader(it) }.let {
+                            mutableMapOf<String, String>().
+                            apply {
+                                it.forEach { put(it.first, it.second) }
+                            }
+                        },
+                        contentType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                        parts = parts)
+        )
+    }
+
+    private fun notify(responses: HttpServletResponse, developer: String, body: Payload) {
+
+        middlewareService.notify(developer, body)
                 .let { response ->
 
                     val outputStream = responses.outputStream
@@ -48,4 +104,10 @@ internal class RequestController(val middlewareService: MiddlewareService) {
                     }
                 }
     }
+
+    private fun path(request: HttpServletRequest, developer: String) =
+            request.servletPath.substringAfter("/req/$developer") + "?" +
+                    request.parameterMap.flatMap { entry ->
+                        entry.value.map { "${entry.key}=${URLEncoder.encode(it, Charsets.UTF_8)}" }
+                    }.joinToString("&")
 }

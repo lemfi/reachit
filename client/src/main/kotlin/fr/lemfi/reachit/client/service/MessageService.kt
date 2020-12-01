@@ -1,6 +1,8 @@
 package fr.lemfi.reachit.client.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import fr.lemfi.reachit.client.business.MultipartPayload
+import fr.lemfi.reachit.client.business.NoMultipartPayload
 import fr.lemfi.reachit.client.business.Payload
 import fr.lemfi.reachit.client.configuration.ForwardProperties
 import fr.lemfi.reachit.client.configuration.ServerProperties
@@ -41,7 +43,7 @@ class MessageService(
         httpClient.newCall(
                 Request.Builder()
                         .url(forwardProperties.host + payload.path)
-                        .method(payload.method, payload.body?.toRequestBody(payload.headers["content-type"]?.toMediaType() ?: "application/json".toMediaType()))
+                        .method(payload.method, payload.toRequestBody())
                         .headers(payload.headers.toHeaders())
                         .build()
         ).execute()
@@ -61,6 +63,25 @@ class MessageService(
                     ).execute()
                 }
 
+
+    }
+
+    private fun Payload.toRequestBody(): RequestBody? {
+        return when (this) {
+            is NoMultipartPayload -> this.body?.toRequestBody(headers["content-type"]?.toMediaType() ?: "application/json".toMediaType())
+            is MultipartPayload -> MultipartBody.Builder()
+                    .apply {
+                        this@toRequestBody.parts.forEach {
+                            if (it.file) {
+                                addFormDataPart(it.name, it.filename, it.data.toRequestBody())
+                            } else {
+                                addFormDataPart(it.name, it.data.contentToString())
+                            }
+                        }
+                    }
+                    .setType("multipart/form-data".toMediaType())
+                    .build()
+        }
 
     }
 }
