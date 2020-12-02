@@ -35,6 +35,4 @@ data class Part(
         val name: String,
         val file: Boolean,
         val filename: String? = null
-//        val size: Long,
-//        val headers: MutableMap<String, String?>
 )
