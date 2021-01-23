@@ -92,7 +92,7 @@ private fun OutputStream.handleRequest(request: String, boundary: String?, body:
                     Content-Type: application/json
 
                     {"message": "method not allowed", "code": 1, "description": "method $method is not allowed for path $path"}"""
-                .trimIndent())
+            .trimIndent())
     }
 }
 
@@ -106,7 +106,7 @@ private fun OutputStream.handleSayHello(who: String) {
                     Content-Type: text/plain
 
                     Hello $who!"""
-                .trimIndent())
+            .trimIndent())
     }
 }
 
@@ -120,7 +120,7 @@ private fun OutputStream.handleSayGoodbye(who: String) {
                     Content-Type: text/plain
 
                     Goodbye $who!"""
-                .trimIndent())
+            .trimIndent())
     }
 }
 
@@ -157,7 +157,7 @@ private fun OutputStream.handleLetter(boundary: String?, content: String) {
                     Content-Type: application/json
 
                     {"message": "Unsupported Media Type", "code": 2, "description": "letter is expected as multipart/form-data"}"""
-                    .trimIndent())
+                .trimIndent())
         }
     } else {
 
@@ -201,7 +201,7 @@ private fun OutputStream.handleLetter(boundary: String?, content: String) {
                     Content-Type: application/json
 
                     {"message": "invalid letter", "code": 2, "description": "you should provide letter and to parameters"}"""
-                        .trimIndent())
+                    .trimIndent())
             }
         }
 

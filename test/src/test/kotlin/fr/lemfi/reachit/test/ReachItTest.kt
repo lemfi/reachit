@@ -15,7 +15,7 @@ import fr.lemfi.reachit.test.sampleapi.startSampleApi
 import org.junit.jupiter.api.TestFactory
 import java.io.File
 
-class Go {
+class ReachItTest {
 
     @TestFactory
     fun go() = `run scenarios`(
