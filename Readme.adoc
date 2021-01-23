@@ -1,0 +1,55 @@
+= Reachit
+
+Well, I'm a developer and my computer cannot be reached by distant servers ... Yeah well that's a concern, I need these servers to call me!
+
+Do you have these kind of troubles? You may consider using reachit.
+
+Reachit purpose is for development only, not for production. It's a helper for developers when developing systems which involve callbacks.
+
+== Big Picture
+
+[ditaa, title=big picture]
+....
+
+                                  2) Distant servers sends callback to Reachit server
+                                     ^
+                 +-------------+     |                        +-------------+
+                 |             |     |                        |             |
+                 |   Reachit   +<-----------------------------+   Distant   |
+                 |   Server    |                              |   Server    |
+                 |             +----------------------------->|             |
+                 +--------+----+   8) Distant server receives +-------------+
+                   ^      |           your answer                   ^
+ 4) Client gets    |      |                                         |
+   callback from   |      |                                         |
+   Reachit server  |      |                                         |
+                   |      | 3) Server pings                         |
+                   |      |    Reachit Client                       |
+                   |      |    Through WebSocket                    + ------------> 1) Make a call to server, giving server a callback to ... call you back!
+                   |      |                                         |                   As server cannot reach you, give as a callback the reachit server url
+ 7) Client sends   |      |                                         |
+    answer to      |      | Websocket                               |
+  Reachit server +-+------+----+                             +------+---------+
+                 |             +<----------------------------|                |
+                 |   Reachit   |  6) your program answers    |   Your program |
+                 |   Client    |                             |   on your      |
+                 |             +---------------------------->+   computer     |
+                 +-------------+                  |          |                |
+                                                  |          +----------------+
+                                                  |
+                                                  +-> 5) Reachit client forwards callback to your program
+....
+
+== How to
+
+. Deploy ReachIt server where distant server can reach it ;)
+. On your local machine, start your Reachit client after having configured it properly:
+    .. Create a file developer.gradle.kts (you can copy file developer.gradle.kts.sample) and put your name in
+    .. In file application.yml of reachit client put
+        ... forward.host: your local server
+        ... server....: replace localhost:8080 by url of your deplyed reachit server
+    .. `./gradlew bootRunDev` to run it
+
+=> your computer's "public address" is now `REACH_IT_SERVER_URL/req/your_name`
+
+Enjoy!
