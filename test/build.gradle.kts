@@ -9,13 +9,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
 
-    implementation("com.github.lemfi.kest:core:0.0.8")
-    implementation("com.github.lemfi.kest:step-http:0.0.8")
-    implementation("com.github.lemfi.kest:junit5:0.0.8")
-
-    implementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
-    runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
-
+    implementation("com.github.lemfi.kest:core:0.1.5")
+    implementation("com.github.lemfi.kest:step-http:0.1.5")
+    implementation("com.github.lemfi.kest:junit5:0.1.5")
 }
 
 

@@ -6,7 +6,7 @@ version = "0.0.1-SNAPSHOT"
 val springBootVersion : String by extra { "2.2.6.RELEASE" }
 
 buildscript {
-    val kotlinVersion : String by extra { "1.3.72" }
+    val kotlinVersion : String by extra { "1.5.0" }
     val springVersion : String by extra { "2.2.6.RELEASE" }
 
     repositories {
@@ -39,8 +39,8 @@ subprojects {
     compileTestKotlin.kotlinOptions.jvmTarget = "1.8"
 
     dependencies {
-        "runtime"("javax.xml.bind:jaxb-api:2.3.0")
-        "runtime"("org.glassfish.jaxb:jaxb-runtime:2.3.2")
+        "runtimeOnly"("javax.xml.bind:jaxb-api:2.3.0")
+        "runtimeOnly"("org.glassfish.jaxb:jaxb-runtime:2.3.2")
         "implementation"("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         "implementation"("org.jetbrains.kotlin:kotlin-reflect")
         "implementation"("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")

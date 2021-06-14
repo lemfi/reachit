@@ -1,4 +1,5 @@
 import org.springframework.boot.gradle.tasks.run.BootRun
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 apply(plugin = "org.springframework.boot")
 
@@ -21,9 +22,12 @@ tasks.register<BootRun>("bootRunDev") {
     setGroup("application")
     dependsOn("assemble")
 
+    val bootJarTask = tasks.getByName<BootJar>("bootJar")
+
+    mainClass.set(provider { bootJarTask.mainClassName })
+    classpath = bootJarTask.classpath
+
     doFirst {
-        main = tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar").get().mainClassName
-        classpath = sourceSets.main.get().runtimeClasspath
         systemProperty("spring.profiles.active", "development")
         systemProperty("server.developer", developer ?: throw IllegalArgumentException("no developer found"))
     }

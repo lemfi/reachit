@@ -5,12 +5,11 @@ import com.github.lemfi.kest.core.cli.`true`
 import com.github.lemfi.kest.core.cli.eq
 import com.github.lemfi.kest.core.cli.scenario
 import com.github.lemfi.kest.executor.http.cli.`given http call`
-import com.github.lemfi.kest.executor.http.model.HttpResponse
 import com.github.lemfi.kest.executor.http.model.filePart
 import com.github.lemfi.kest.executor.http.model.multipartBody
 import com.github.lemfi.kest.executor.http.model.parameterPart
 import com.github.lemfi.kest.json.model.JsonMap
-import com.github.lemfi.kest.junit5.runner.`run scenarios`
+import com.github.lemfi.kest.junit5.runner.`play scenarios`
 import fr.lemfi.reachit.test.sampleapi.startSampleApi
 import org.junit.jupiter.api.TestFactory
 import java.io.File
@@ -18,22 +17,18 @@ import java.io.File
 class ReachItTest {
 
     @TestFactory
-    fun go() = `run scenarios`(
+    fun go() = `play scenarios`(
 
             scenario {
 
-                name = "say hello"
+                name { "say hello" }
 
-                lateinit var expected: HttpResponse<String>
-
-                `given http call`<String> {
+                val expected = `given http call`<String> {
 
                     url = "http://localhost:8001/hello"
                     method = "POST"
                     body = """{"who": "Darth Vader"}"""
                     contentType = "application/json"
-
-                    withResult { expected = this }
                 }
 
                 `given http call`<String> {
@@ -45,22 +40,19 @@ class ReachItTest {
 
                 } `assert that` {
 
-                    eq(expected.status, it.status)
+                    eq(expected().status, it.status)
                     eq("Hello Han Solo!", it.body)
                 }
             },
 
             scenario {
 
-                name = "get greeted list"
+                name { "get greeted list" }
 
-                lateinit var expected: HttpResponse<List<String>>
-
-                `given http call`<List<String>> {
+                val expected = `given http call`<List<String>> {
 
                     url = "http://localhost:8001/hello"
 
-                    withResult { expected = this }
                 }
 
                 `given http call`<List<String>> {
@@ -68,9 +60,9 @@ class ReachItTest {
                     url = "http://localhost:8080/req/flemontreer/hello"
                 } `assert that` { step ->
 
-                    eq(expected.status, step.status)
-                    eq(expected.body, step.body)
-                    expected.headers.forEach {
+                    eq(expected().status, step.status)
+                    eq(expected().body, step.body)
+                    expected().headers.forEach {
                         `true`(step.headers.containsKey(it.key))
                         eq(it.value, step.headers[it.key])
                     }
@@ -79,15 +71,12 @@ class ReachItTest {
 
             scenario {
 
-                name = "status code is correctly forwarded"
+                name { "status code is correctly forwarded" }
 
-                lateinit var expected: HttpResponse<JsonMap>
-
-                `given http call`<JsonMap> {
+                val expected = `given http call`<JsonMap> {
 
                     url = "http://localhost:8001/whatever"
 
-                    withResult { expected = this }
                 }
 
                 `given http call`<JsonMap> {
@@ -95,9 +84,9 @@ class ReachItTest {
                     url = "http://localhost:8080/req/flemontreer/whatever"
                 } `assert that` { step ->
 
-                    eq(expected.status, step.status)
-                    eq(expected.body, step.body)
-                    expected.headers.forEach {
+                    eq(expected().status, step.status)
+                    eq(expected().body, step.body)
+                    expected().headers.forEach {
                         `true`(step.headers.containsKey(it.key))
                         eq(it.value, step.headers[it.key])
                     }
@@ -106,17 +95,15 @@ class ReachItTest {
 
             scenario {
 
-                name = "multipart/form-data is correctly handled"
+                name { "multipart/form-data is correctly handled" }
 
-                lateinit var expected: HttpResponse<String>
-
-                `given http call`<String> {
+                val expected = `given http call`<String> {
 
                     url = "http://localhost:8001/send-letter"
                     method = "POST"
                     body = multipartBody(
                             filePart {
-                                file = File(this.javaClass.getResource("/santa_claus.txt").toURI())
+                                file = File(javaClass.getResource("/santa_claus.txt")!!.toURI())
                                 name = "letter"
                                 filename = "my_letter.txt"
                                 contentType = "text/plain"
@@ -126,8 +113,6 @@ class ReachItTest {
                                 value = "santa claus"
                             }
                     )
-
-                    withResult { expected = this }
                 }
 
                 `given http call`<JsonMap> {
@@ -136,7 +121,7 @@ class ReachItTest {
                     method = "POST"
                     body = multipartBody(
                             filePart {
-                                file = File(this.javaClass.getResource("/santa_claus.txt").toURI())
+                                file = File(javaClass.getResource("/santa_claus.txt")!!.toURI())
                                 name = "letter"
                                 filename = "my_letter.txt"
                                 contentType = "text/plain"
@@ -149,9 +134,9 @@ class ReachItTest {
 
                 } `assert that` { step ->
 
-                    eq(expected.status, step.status)
-                    eq(expected.body, step.body)
-                    expected.headers.forEach {
+                    eq(expected().status, step.status)
+                    eq(expected().body, step.body)
+                    expected().headers.forEach {
                         `true`(step.headers.containsKey(it.key))
                         eq(it.value, step.headers[it.key])
                     }
