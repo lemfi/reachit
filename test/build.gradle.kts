@@ -1,7 +1,3 @@
-apply(plugin = "org.springframework.boot")
-
-val springBootVersion: String by rootProject.extra
-
 dependencies {
 
     implementation("org.slf4j:slf4j-api:1.7.28")

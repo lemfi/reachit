@@ -35,13 +35,15 @@ fun startSampleApi() {
                     var line: String?
                     var requestLine: String? = null
                     var body: String? = null
-                    while (reader.readLine().also { line = it }.let { it != null && it != "" } ) {
+                    while (reader.readLine().also { line = it }.let { it != null && it != "" }) {
                         val currentLine = line!!
                         if (requestLine == null) {
                             requestLine = currentLine
                         }
                         if (currentLine.startsWith("Content-Type") && currentLine.contains("multipart/form-data")) {
-                            boundary = currentLine.substringAfter("boundary=").substringBefore("\n").substringBefore(";").trim()
+                            boundary =
+                                currentLine.substringAfter("boundary=").substringBefore("\n").substringBefore(";")
+                                    .trim()
                         }
                         if (currentLine.startsWith("Content-Length")) {
                             val headerValue = currentLine.substringAfter(":").trim { it <= ' ' }
@@ -61,7 +63,8 @@ fun startSampleApi() {
                     }
                     output.flush()
                     output.close()
-                } catch (e: SocketException) {}
+                } catch (e: SocketException) {
+                }
             }
         }
     }
@@ -78,21 +81,32 @@ private fun OutputStream.handleRequest(request: String, boundary: String?, body:
 
     val (method, path) = request.split(" ").let { it[0] to it[1].substringBefore("?") }
 
-    if (method == "POST" && path == "/hello") handleSayHello(jacksonObjectMapper().readValue(body!!, Map::class.java)["who"] as String)
+
+    if (method == "POST" && path == "/hello") handleSayHello(
+        jacksonObjectMapper().readValue(
+            body!!,
+            Map::class.java
+        )["who"] as String
+    )
     else if (method == "GET" && path == "/hello") handleListHello()
-
-    else if (method == "DELETE" && path.startsWith("/hello")) handleSayGoodbye(URLDecoder.decode(path.substringAfter("who="), Charsets.UTF_8))
-
+    else if (method == "DELETE" && path.startsWith("/hello")) handleSayGoodbye(
+        URLDecoder.decode(
+            path.substringAfter("who="),
+            Charsets.UTF_8
+        )
+    )
     else if (method == "POST" && path == "/send-letter") handleLetter(boundary, body!!)
     else if (method == "GET" && path == "/sent-letters") handleSentLetters()
-
     else PrintWriter(this, true).apply {
-        println("""
+        println(
+            """
                     HTTP/1.1 405 OK
                     Content-Type: application/json
+                    Content-Length: ${"""{"message": "method not allowed", "code": 1, "description": "method $method is not allowed for path $path"}""".length}
 
                     {"message": "method not allowed", "code": 1, "description": "method $method is not allowed for path $path"}"""
-            .trimIndent())
+                .trimIndent()
+        )
     }
 }
 
@@ -101,12 +115,15 @@ private fun OutputStream.handleSayHello(who: String) {
     helloPeople.add(who)
 
     PrintWriter(this, true).apply {
-        println("""
+        println(
+            """
                     HTTP/1.1 201 OK
                     Content-Type: text/plain
+                    Content-Length: ${"Hello $who!".length}
 
                     Hello $who!"""
-            .trimIndent())
+                .trimIndent()
+        )
     }
 }
 
@@ -115,36 +132,59 @@ private fun OutputStream.handleSayGoodbye(who: String) {
     helloPeople.remove(who)
 
     PrintWriter(this, true).apply {
-        println("""
+        println(
+            """
                     HTTP/1.1 201 OK
                     Content-Type: text/plain
+                    Content-Length: ${"Goodbye $who!".length}
 
                     Goodbye $who!"""
-            .trimIndent())
+                .trimIndent()
+        )
     }
 }
 
 private fun OutputStream.handleListHello() {
 
     PrintWriter(this, true).apply {
-        println("""
+        println(
+            """
                     HTTP/1.1 200 OK
                     Content-Type: application/json
+                    Content-Length: ${"[${helloPeople.map { """"$it"""" }.joinToString(", ")}]".length}
 
                     [${helloPeople.map { """"$it"""" }.joinToString(", ")}]
-                """.trimIndent())
+                """.trimIndent()
+        )
     }
 }
 
 private fun OutputStream.handleSentLetters() {
 
     PrintWriter(this, true).apply {
-        println("""
+        println(
+            """
                     HTTP/1.1 200 OK
                     Content-Type: application/json
+                    Content-Length: ${
+                "[${
+                    letters.map {
+                        """{"to": "${it.key}", "letters": [${
+                            it.value.map { """"$it"""" }.joinToString(", ")
+                        }]}"""
+                    }.joinToString(", ")
+                }]".length
+            }
 
-                    [${letters.map { """{"to": "${it.key}", "letters": [${it.value.map { """"$it"""" }.joinToString(", ")}]}""" }.joinToString(", ")}]
-                """.trimIndent())
+                    [${
+                letters.map {
+                    """{"to": "${it.key}", "letters": [${
+                        it.value.map { """"$it"""" }.joinToString(", ")
+                    }]}"""
+                }.joinToString(", ")
+            }]
+                """.trimIndent()
+        )
     }
 }
 
@@ -152,12 +192,15 @@ private fun OutputStream.handleLetter(boundary: String?, content: String) {
 
     if (boundary == null) {
         PrintWriter(this, true).apply {
-            println("""
+            println(
+                """
                     HTTP/1.1 415 OK
                     Content-Type: application/json
+                    Content-Length: ${"""{"message": "Unsupported Media Type", "code": 2, "description": "letter is expected as multipart/form-data"}""".length}
 
                     {"message": "Unsupported Media Type", "code": 2, "description": "letter is expected as multipart/form-data"}"""
-                .trimIndent())
+                    .trimIndent()
+            )
         }
     } else {
 
@@ -169,7 +212,6 @@ private fun OutputStream.handleLetter(boundary: String?, content: String) {
         data.forEach {
             val contentDisposition = it.substringAfter("Content-Disposition:").substringBefore("\n").trim()
             val name = contentDisposition.substringAfter("name=\"").substringBefore("\"").trim()
-            val filename = contentDisposition.substringAfter("filename=\"").substringBefore("\"").trim().ifEmpty { null }
             val contentType = it.substringAfter("Content-Type:").substringBefore("\n").trim().ifEmpty { null }
 
             if (name == "letter") {
@@ -187,21 +229,27 @@ private fun OutputStream.handleLetter(boundary: String?, content: String) {
             else letters.put(to!!, mutableListOf(letter!!))
 
             PrintWriter(this, true).apply {
-                println("""
+                println(
+                    """
                     HTTP/1.1 200 OK
                     Content-Type: text/plain
+                    Content-Length: ${"Your letter was successfully sent to $to".length}
 
                     Your letter was successfully sent to $to
-                """.trimIndent())
+                """.trimIndent()
+                )
             }
         } else {
             PrintWriter(this, true).apply {
-                println("""
+                println(
+                    """
                     HTTP/1.1 422 OK
                     Content-Type: application/json
+                    Content-Length: ${"""{"message": "invalid letter", "code": 2, "description": "you should provide letter and to parameters"}""".length}
 
                     {"message": "invalid letter", "code": 2, "description": "you should provide letter and to parameters"}"""
-                    .trimIndent())
+                        .trimIndent()
+                )
             }
         }
 
@@ -211,5 +259,6 @@ private fun OutputStream.handleLetter(boundary: String?, content: String) {
 
 fun main() {
     startSampleApi()
-    while (true) {}
+    while (true) {
+    }
 }

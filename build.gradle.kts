@@ -1,13 +1,15 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group  = "fr.lemfi.reachit"
+val hopliteVersion: String by extra { "1.3.8" }
+
+group = "fr.lemfi.reachit"
 version = "0.0.1-SNAPSHOT"
 
-val springBootVersion : String by extra { "2.2.6.RELEASE" }
+val springBootVersion: String by extra { "2.2.6.RELEASE" }
 
 buildscript {
-    val kotlinVersion : String by extra { "1.5.0" }
-    val springVersion : String by extra { "2.2.6.RELEASE" }
+    val kotlinVersion: String by extra { "1.5.0" }
+    val springVersion: String by extra { "2.2.6.RELEASE" }
 
     repositories {
         mavenCentral()
@@ -39,11 +41,6 @@ subprojects {
     compileTestKotlin.kotlinOptions.jvmTarget = "1.8"
 
     dependencies {
-        "runtimeOnly"("javax.xml.bind:jaxb-api:2.3.0")
-        "runtimeOnly"("org.glassfish.jaxb:jaxb-runtime:2.3.2")
-        "implementation"("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-        "implementation"("org.jetbrains.kotlin:kotlin-reflect")
-        "implementation"("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
-        "implementation"("com.squareup.okhttp3:okhttp:4.2.2")
+        "implementation"("org.jetbrains.kotlin:kotlin-reflect:1.5.0")
     }
 }

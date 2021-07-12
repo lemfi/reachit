@@ -1,12 +1,27 @@
 package fr.lemfi.reachit.server
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.jackson.*
+import io.ktor.routing.*
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
 
-@SpringBootApplication
-open class Application
+fun main() {
 
-fun main(args: Array<String>) {
-    runApplication<Application>(*args)
+    embeddedServer(CIO, port = 8080) {
+
+        install(ContentNegotiation) {
+            jackson()
+        }
+
+        routing {
+
+            setupGateway()
+            setupClientsConnections()
+            setupProxyResponses()
+        }
+    }.start(wait = true)
+
 }
 

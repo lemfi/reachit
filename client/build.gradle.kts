@@ -1,34 +1,28 @@
-import org.springframework.boot.gradle.tasks.run.BootRun
-import org.springframework.boot.gradle.tasks.bundling.BootJar
+val hopliteVersion: String by project.rootProject.extra
 
-apply(plugin = "org.springframework.boot")
+plugins {
+    application
+}
 
-val springBootVersion: String by rootProject.extra
-
+application {
+    mainClass.set("fr.lemfi.reachit.client.ReachitClientKt")
+}
 dependencies {
 
-    implementation("org.springframework.boot:spring-boot-starter:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:$springBootVersion")
+    implementation("io.ktor:ktor-client-websockets:1.6.1")
+    implementation("io.ktor:ktor-client-core:1.6.1")
+    implementation("io.ktor:ktor-client-cio:1.6.1")
 
-}
+    implementation("org.slf4j:slf4j-simple:1.7.28")
 
-apply {
-    from("$rootDir/developer.gradle.kts")
-}
-val developer: String? by extra
+    implementation("io.ktor:ktor-client-jackson:1.6.1")
 
-tasks.register<BootRun>("bootRunDev") {
-    setGroup("application")
-    dependsOn("assemble")
-
-    val bootJarTask = tasks.getByName<BootJar>("bootJar")
-
-    mainClass.set(provider { bootJarTask.mainClassName })
-    classpath = bootJarTask.classpath
-
-    doFirst {
-        systemProperty("spring.profiles.active", "development")
-        systemProperty("server.developer", developer ?: throw IllegalArgumentException("no developer found"))
+    implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion") {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-reflect")
+    }
+    implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion") {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-reflect")
     }
 }

@@ -1,12 +1,31 @@
-apply(plugin = "org.springframework.boot")
-
-val springBootVersion: String by rootProject.extra
+import org.gradle.api.file.DuplicatesStrategy
 
 dependencies {
 
-    implementation("org.springframework.boot:spring-boot-starter:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:$springBootVersion")
+    implementation("io.ktor:ktor-server-core:1.6.1") {
+        exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
+    }
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    implementation("org.slf4j:slf4j-simple:1.7.28")
+
+    implementation("io.ktor:ktor-server-cio:1.6.1")
+    implementation("io.ktor:ktor-websockets:1.6.1")
+    implementation("io.ktor:ktor-jackson:1.6.1")
+
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "fr.lemfi.reachit.server.ApplicationKt"
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//    from(sourceSets.main.get().output)
+//    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }
