@@ -84,14 +84,17 @@ private suspend fun HttpClient.retrievePayload(key: String): Payload {
 
 private suspend fun HttpClient.forwardRequest(key: String, payload: Payload): HttpResponse {
     return try {
+
+        logger.info("Forwarding request ${payload.method} ${payload.path} ...")
+
         request<HttpStatement>("$forwardUrl${payload.path}") {
             method = HttpMethod(payload.method)
 
-            payload.headers.filterNot {
-                it.key.uppercase() == "CONTENT-LENGTH" || it.key.uppercase() == "CONTENT-TYPE"
-            }.forEach {
-                headers.append(it.key, it.value)
-            }
+            payload.headers
+                .filterUnsafeHeaders()
+                .forEach {
+                    headers.append(it.key, it.value)
+                }
 
             if (payload.body != null) {
                 body = ByteArrayContent(
@@ -113,11 +116,12 @@ private suspend fun HttpClient.answer(
     post<HttpStatement>("$httpProtocol://$serverHost/resp/$key") {
         method = HttpMethod.Post
         headers.apply {
-            httpResponse.headers.toMap().filterNot {
-                it.key.uppercase() == "CONTENT-LENGTH" || it.key.uppercase() == "CONTENT-TYPE"
-            }.forEach { (key, value) ->
-                append(key, value.first())
-            }
+            httpResponse.headers
+                .toMap()
+                .filterUnsafeHeaders()
+                .forEach { (key, value) ->
+                    append(key, value.first())
+                }
             append("X-Reachit-Status", "${httpResponse.status.value}")
         }
         body = ByteArrayContent(
@@ -140,3 +144,10 @@ private suspend fun HttpClient.answerError(
 
     }.execute()
 }
+
+private fun <R> Map<String, R>.filterUnsafeHeaders() =
+    filterNot {
+        it.key.uppercase() == "CONTENT-LENGTH"
+                || it.key.uppercase() == "CONTENT-TYPE"
+                || it.key.uppercase() == "TRANSFER-ENCODING"
+    }
