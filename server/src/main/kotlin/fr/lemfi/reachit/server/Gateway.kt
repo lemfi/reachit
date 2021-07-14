@@ -69,12 +69,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.manageRequest() {
         }
     }
     call.respondBytes {
-        Channel<Response>().also {
-            notifyClient(developer, payload.key)
-            channels.put(payload.key, it)
-        }.receive().apply {
-            channels.remove(payload.key)
-        }.body!!
+        response.body!!
     }
 }
 
