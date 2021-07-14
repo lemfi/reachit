@@ -64,9 +64,13 @@ private suspend fun connectToServer() {
 }
 
 private suspend fun HttpClient.forward(key: String) {
-    retrievePayload(key)
-        .run { forwardRequest(this) }
-        .apply { answer(key, this) }
+    try {
+        retrievePayload(key)
+            .run { forwardRequest(key, this) }
+            .apply { answer(key, this) }
+    } catch (e: Throwable) {
+        logger.warn("an error orccured while forwarding request: ", e.message, e)
+    }
 }
 
 private suspend fun HttpClient.retrievePayload(key: String): Payload {
@@ -78,23 +82,28 @@ private suspend fun HttpClient.retrievePayload(key: String): Payload {
     }
 }
 
-private suspend fun HttpClient.forwardRequest(payload: Payload): HttpResponse {
-    return request<HttpStatement>("$forwardUrl${payload.path}") {
-        method = HttpMethod(payload.method)
+private suspend fun HttpClient.forwardRequest(key: String, payload: Payload): HttpResponse {
+    return try {
+        request<HttpStatement>("$forwardUrl${payload.path}") {
+            method = HttpMethod(payload.method)
 
-        payload.headers.filterNot {
-            it.key.uppercase() == "CONTENT-LENGTH" || it.key.uppercase() == "CONTENT-TYPE"
-        }.forEach {
-            headers.append(it.key, it.value)
-        }
+            payload.headers.filterNot {
+                it.key.uppercase() == "CONTENT-LENGTH" || it.key.uppercase() == "CONTENT-TYPE"
+            }.forEach {
+                headers.append(it.key, it.value)
+            }
 
-        if (payload.body != null) {
-            body = ByteArrayContent(
-                payload.body,
-                ContentType.parse(payload.headers["Content-Type"] ?: "application/octet-stream")
-            )
-        }
-    }.execute()
+            if (payload.body != null) {
+                body = ByteArrayContent(
+                    payload.body,
+                    ContentType.parse(payload.headers["Content-Type"] ?: "application/octet-stream")
+                )
+            }
+        }.execute()
+    } catch (e: Throwable) {
+        answerError(key)
+        throw e
+    }
 }
 
 private suspend fun HttpClient.answer(
@@ -115,5 +124,19 @@ private suspend fun HttpClient.answer(
             httpResponse.readBytes(),
             ContentType.parse(httpResponse.headers["Content-Type"] ?: "application/octet-stream")
         )
+    }.execute()
+}
+
+private suspend fun HttpClient.answerError(
+    key: String
+) {
+    post<HttpStatement>("$httpProtocol://$serverHost/resp/$key") {
+        method = HttpMethod.Post
+        headers.apply { append("X-Reachit-Status", "503") }
+        body = TextContent(
+            """{ "error": "server is currently not available" }""",
+            ContentType.parse("application/json")
+        )
+
     }.execute()
 }
