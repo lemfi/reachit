@@ -27,16 +27,16 @@ fun Application.setupGateway() {
 
     routing {
 
-        get("/req/{developer}/*") {
+        get("/req/{developer}/{...}") {
             manageRequest()
         }
-        post("/req/{developer}/*") {
+        post("/req/{developer}/{...}") {
             manageRequest()
         }
-        put("/req/{developer}/*") {
+        put("/req/{developer}/{...}") {
             manageRequest()
         }
-        delete("/req/{developer}/*") {
+        delete("/req/{developer}/{...}") {
             manageRequest()
         }
 
