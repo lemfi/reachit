@@ -97,6 +97,8 @@ private fun OutputStream.handleRequest(request: String, boundary: String?, body:
     )
     else if (method == "POST" && path == "/send-letter") handleLetter(boundary, body!!)
     else if (method == "GET" && path == "/sent-letters") handleSentLetters()
+    else if (method == "GET" && path == "/lorem-ipsum") handleLoremIpsum()
+
     else PrintWriter(this, true).apply {
         println(
             """
@@ -157,6 +159,46 @@ private fun OutputStream.handleListHello() {
                 """.trimIndent()
         )
     }
+}
+
+private fun OutputStream.handleLoremIpsum() {
+
+    val speak = """Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        |Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+        |Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+        |Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.""".trimMargin()
+
+    val chunks = speak.length / 100 + if (speak.length % 100 > 0) 1 else 0
+
+    PrintWriter(this, false).apply {
+        println(
+            """HTTP/1.1 200 OK
+            |Content-Type: text/plain
+            |Transfer-Encoding: chunked
+            |Connection: keep-alive
+            |Keep-Alive: timeout=60
+            |
+            |${100.toString(16)}
+            |${speak.subSequence(0, 100)}"""
+                .trimMargin()
+        )
+    }.apply { flush() }
+
+    (1 until chunks).forEach {
+        val chunk = speak.subSequence(it * 100, minOf(it * 100 + 100, speak.length))
+        PrintWriter(this, false).apply {
+            println(
+                """${chunk.length.toString(16)}
+                    |$chunk"""
+                    .trimMargin()
+            )
+        }.apply { flush() }
+    }
+    PrintWriter(this, false).apply {
+        println("""
+            |0
+            |""".trimMargin())
+    }.apply { flush() }
 }
 
 private fun OutputStream.handleSentLetters() {

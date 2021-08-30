@@ -143,6 +143,34 @@ class ReachItTest {
             }
         },
 
+        scenario {
+
+            name { "chunked encoding is correctly handled" }
+
+            val expected = `given http call`<String> {
+
+                url = "http://localhost:8001/lorem-ipsum"
+                method = "GET"
+            }
+
+            `given http call`<JsonMap> {
+
+                url = "http://localhost:8080/req/flemontreer/lorem-ipsum"
+                method = "GET"
+
+            } `assert that` { step ->
+
+                eq(expected().status, step.status)
+                eq(expected().body, step.body)
+                expected().headers
+                    .filterNot { it.key == "Transfer-Encoding" }
+                    .forEach {
+                    `true`(step.headers.containsKey(it.key)) { "headers should contain key ${it.key}" }
+                    eq(it.value, step.headers[it.key]) { "header ${it.key} should take value ${it.value}" }
+                }
+            }
+        },
+
         beforeEach = {
             startSampleApi()
         }
