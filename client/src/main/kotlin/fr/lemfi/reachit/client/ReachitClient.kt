@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 private val logger = LoggerFactory.getLogger("Reachit-Client")
 
 private val developer = property { developer }
-private val serverHost = property { serverHost }
+private val serverHost = property { serverhost }
 private val forwardUrl = property { forwardurl }
 private val httpProtocol = property { httpprotocol }
 private val wsProtocol = property { wsprotocol }

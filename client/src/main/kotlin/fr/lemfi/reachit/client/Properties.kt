@@ -33,7 +33,7 @@ inline fun <T> property(l: Properties.() -> T): T {
 
 data class Properties(
     val developer: String,
-    val serverHost: String,
+    val serverhost: String,
     val wsprotocol: String,
     val httpprotocol: String,
     val forwardurl: String,

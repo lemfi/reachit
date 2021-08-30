@@ -1,5 +1,5 @@
 developer: flemontreer
-serverHost: localhost:8080
+serverhost: localhost:8080
 wsprotocol: ws
 httpprotocol: http
 forwardurl: http://localhost:8001
