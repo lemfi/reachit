@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fr.lemfi.reachit.client.model.Payload
 import io.ktor.client.*
-import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.websocket.*
 import io.ktor.client.request.*
@@ -41,7 +40,7 @@ fun main() {
 
 private suspend fun connectToServer() {
 
-    HttpClient(CIO) {
+    HttpClient {
         expectSuccess = false
         install(WebSockets)
         install(JsonFeature) {
