@@ -46,11 +46,16 @@ It's a helper for developers when developing systems which involve callbacks.
 
 . Deploy ReachIt server where distant server can reach it ;)
 . On your local machine, start your Reachit client after having configured it properly:
-.. Create a file developer.gradle.kts (you can copy file developer.gradle.kts.sample) and put your name in
-.. In file application.yml of reachit client put
-... forward.host: your local server
-... server....: replace localhost:8080 by url of your deplyed reachit server
-.. `./gradlew bootRunDev` to run it
+.. In file reachit.yml of reachit client put
+... developer: your name or pseudo
+... forwardurl: your local server
+... serverhost: your distant reachit server host (and port if necessary)
+... wsprotocol: `ws` or `wss`
+... httpprotocol: `http` or `https`
+.. `./gradlew :client:run` or `./gradlew run` to run it
+
+NOTE: configuration can be overriden by environment variables, i.e. for example: +
+`DEVELOPER=myname FORWARDURL=http://localhot:8080 ./gradlew run`
 
 => your computer's "public address" is now `REACH_IT_SERVER_URL/req/your_name`
 
