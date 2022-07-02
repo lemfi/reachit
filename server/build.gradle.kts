@@ -2,7 +2,7 @@ import org.gradle.api.file.DuplicatesStrategy
 
 dependencies {
 
-    implementation("io.ktor:ktor-server-core:1.6.1") {
+    implementation("io.ktor:ktor-server-core:2.0.3") {
         exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
     }
 
