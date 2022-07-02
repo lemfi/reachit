@@ -6,7 +6,7 @@ dependencies {
         exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
     }
 
-    implementation("org.slf4j:slf4j-simple:1.7.28")
+    implementation("org.slf4j:slf4j-simple:1.7.36")
 
     implementation("io.ktor:ktor-server-cio:1.6.1")
     implementation("io.ktor:ktor-websockets:1.6.1")
