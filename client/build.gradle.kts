@@ -10,7 +10,7 @@ application {
 dependencies {
 
     implementation("io.ktor:ktor-client-websockets:1.6.1")
-    implementation("io.ktor:ktor-client-core:1.6.1")
+    implementation("io.ktor:ktor-client-core:2.1.0")
     implementation("io.ktor:ktor-client-java:1.6.1")
 
     implementation("org.slf4j:slf4j-simple:1.7.36")
