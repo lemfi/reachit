@@ -15,7 +15,7 @@ dependencies {
 
     implementation("org.slf4j:slf4j-simple:1.7.36")
 
-    implementation("io.ktor:ktor-client-jackson:1.6.1")
+    implementation("io.ktor:ktor-client-jackson:2.2.2")
 
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion") {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
